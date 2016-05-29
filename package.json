@@ -12,13 +12,10 @@
     "type": "git",
     "url": "https://github.com/ttaubert/nss-taskcluster.git"
   },
-  "devDependencies": {
-    "babel-cli": "^6.0.0",
-    "babel-compile": "^2.0.0",
-    "babel-preset-taskcluster": "^2.3.0"
-  },
   "dependencies": {
     "array-unique": "^0.2.1",
+    "babel-compile": "^2.0.0",
+    "babel-preset-taskcluster": "^2.3.0",
     "irc-colors": "^1.2.1",
     "jerk": "^1.1.23",
     "peoplestring-parse": "^2.0.3",
