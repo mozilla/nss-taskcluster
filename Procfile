@@ -1,1 +1,1 @@
-app: node lib/index server
+app: node lib/index
