@@ -1,2 +1,1 @@
-web: node lib/index server
-worker: node lib/index worker
+app: node lib/index server
