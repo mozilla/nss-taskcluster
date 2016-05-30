@@ -5,6 +5,7 @@
 import hg from "./hg";
 import irc from "./irc";
 import tcc from "./tcc";
+import email from "./email";
 import colors from "irc-colors";
 import unique from "array-unique";
 
@@ -34,13 +35,11 @@ tcc.onTaskDefined(async function (msg) {
     return;
   }
 
-  let options = {includeHref: true};
-  let changesets = await hg.fetchChangesets(th.revision, options);
+  let level = colors.blue("push");
+  let changesets = await hg.fetchChangesets(th.revision);
 
   for (let changeset of changesets) {
-    let level = colors.blue("push");
-    let desc = changeset.desc.split("\n")[0];
-    irc.say(`[${level}] ${changeset.href} - ${changeset.author.name} - ${desc}`);
+    irc.say(`[${level}] ${changeset.href} - ${changeset.author.name} - ${changeset.desc}`);
   }
 });
 
@@ -58,11 +57,25 @@ tcc.onTaskFailed(async function (msg) {
   let collection = Object.keys(th.collection || {})[0] || "opt";
   let platform = PLATFORMS[th.build.platform] || th.build.platform;
 
-  let level = colors.red("failure");
+  // Fetch changesets.
+  let changesets = await hg.fetchChangesets(th.revision);
+  let authors = changesets.map(changeset => changeset.author);
   let url = TASK_INSPECTOR_URL + taskId;
-  let authors = await hg.fetchBlamelist(th.revision);
+  let level = colors.red("failure");
+
   let blame = unique(authors.map(author => author.name)).join(", ");
   irc.say(`[${level}] ${url} - ${task.metadata.name} @ ${platform} ${collection} (blame: ${blame})`);
+
+  // Build descriptions.
+  let descriptions = changesets.map(changeset => {
+    return `${changeset.author.name} - ${changeset.desc}\n${changeset.href}`;
+  });
+
+  // Send emails.
+  email.send(authors,
+    `[NSS Taskcluster] ${task.metadata.name} FAILING on ${platform} ${collection} @ ${th.revision}`,
+    `${task.metadata.name} @ ${platform} ${collection}\n` +
+    `${url}\n\n${descriptions.join("\n\n")}`);
 });
 
 // Join ASAP.

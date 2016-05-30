@@ -19,6 +19,7 @@
     "irc-colors": "^1.2.1",
     "jerk": "^1.1.23",
     "peoplestring-parse": "^2.0.3",
+    "postmark": "^1.2.1",
     "request-json": "^0.5.6",
     "taskcluster-client": "^1.0.1"
   }

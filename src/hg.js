@@ -37,8 +37,7 @@ async function shortenRevision(revision) {
   return tryShortenedRevisionHash(12);
 };
 
-async function fetchChangesets(revision, options = {}) {
-  let includeHref = options && options.includeHref;
+async function fetchChangesets(revision) {
   let json = await jsonRequest(HG_REPO + "/json-pushes?full&changeset=" + revision);
 
   let id = Object.keys(json)[0];
@@ -46,20 +45,13 @@ async function fetchChangesets(revision, options = {}) {
 
   for (let changeset of changesets) {
     changeset.author = parse(changeset.author);
+    changeset.desc = changeset.desc.split("\n")[0];
 
-    if (includeHref) {
-      let short_rev = await shortenRevision(revision);
-      changeset.href = HG_HOST + HG_REPO + "/rev/" + short_rev;
-    }
+    let short_rev = await shortenRevision(revision);
+    changeset.href = HG_HOST + HG_REPO + "/rev/" + short_rev;
   }
 
   return changesets;
 }
 
-async function fetchBlamelist(revision) {
-  let changesets = await fetchChangesets(revision);
-  return changesets.map(changeset => changeset.author);
-};
-
 module.exports.fetchChangesets = fetchChangesets;
-module.exports.fetchBlamelist = fetchBlamelist;
