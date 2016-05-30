@@ -5,7 +5,7 @@
 import taskcluster from "taskcluster-client";
 
 let queueEvents = new taskcluster.QueueEvents();
-var scheduler = new taskcluster.Scheduler();
+let scheduler = new taskcluster.Scheduler();
 let queue = new taskcluster.Queue();
 
 function onTaskDefined(callback) {
