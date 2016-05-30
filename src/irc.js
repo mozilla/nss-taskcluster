@@ -5,7 +5,7 @@
 import jerk from "jerk";
 
 const NICK = "daneel";
-const CHANNEL = "#nss-test";
+const CHANNEL = "#nss";
 const SERVER = "irc.mozilla.org";
 
 let waiting, bot, connected;
