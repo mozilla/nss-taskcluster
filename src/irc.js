@@ -4,7 +4,7 @@
 
 import jerk from "jerk";
 
-const NICK = "daneel";
+const NICK = "nss-tc";
 const CHANNEL = "#nss";
 const SERVER = "irc.mozilla.org";
 
