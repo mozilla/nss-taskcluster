@@ -47,7 +47,7 @@ async function fetchChangesets(revision) {
     changeset.author = parse(changeset.author);
     changeset.desc = changeset.desc.split("\n")[0];
 
-    let short_rev = await shortenRevision(revision);
+    let short_rev = await shortenRevision(changeset.node);
     changeset.href = HG_HOST + HG_REPO + "/rev/" + short_rev;
   }
 
