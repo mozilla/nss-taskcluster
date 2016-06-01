@@ -2,55 +2,37 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-import jerk from "jerk";
+import irc from "irc";
 
 const NICK = "nss-tc";
 const CHANNEL = "#nss";
 const SERVER = "irc.mozilla.org";
 
-let waiting, bot, connected;
-let queue = [];
+let client;
 
 function say(msg) {
-  queue.push([CHANNEL, msg]);
-  processQueue();
+  if (!client) {
+    connect();
+  }
+
+  client.say(CHANNEL, msg);
 };
 
-function processQueue() {
-  if (!connected) {
-    connect();
-    return;
-  }
-
-  if (!queue.length || waiting) {
-    return;
-  }
-
-  bot.say.apply(bot, queue.shift());
-
-  waiting = true;
-  setTimeout(() => {
-    waiting = false;
-    processQueue();
-  }, 500);
-}
-
 function connect() {
-  if (bot) {
+  if (client) {
     return;
   }
 
-  function onConnect() {
-    connected = true;
-    processQueue();
-  }
-
-  bot = jerk(() => {}).connect({
-    server: SERVER,
-    onConnect: onConnect,
+  client = new irc.Client(SERVER, NICK, {
+    floodProtection: true,
     channels: [CHANNEL],
-    waitForPing: true,
-    nick: NICK
+    secure: true,
+    port: 6697
+  });
+
+  // Keep it from crashing.
+  client.addListener("error", msg => {
+    console.log("irc error: ", msg);
   });
 }
 
