@@ -9,12 +9,15 @@ import email from "./email";
 import colors from "irc-colors";
 import unique from "array-unique";
 
+const MAX_FAILURES_PER_REVISION = 3;
 const TASK_INSPECTOR_URL = "https://tools.taskcluster.net/task-inspector/#";
 
 const PLATFORMS = {
   linux32: "Linux",
   linux64: "Linux x64"
 };
+
+let failuresPerRevision = new Map();
 
 function containsNssRoute(routes) {
   return routes.some(r => /^tc-treeherder\.nss\./.test(r));
@@ -52,6 +55,13 @@ tcc.onTaskFailed(async function (msg) {
   let taskId = msg.payload.status.taskId;
   let task = await tcc.fetchTask(taskId);
   let th = task.extra.treeherder;
+
+  // Let's not annoy people.
+  let numFailures = failuresPerRevision.get(th.revision) || 0;
+  failuresPerRevision.set(th.revision, ++numFailures);
+  if (numFailures > MAX_FAILURES_PER_REVISION) {
+    return;
+  }
 
   // Determine platform.
   let collection = Object.keys(th.collection || {})[0] || "opt";
