@@ -34,6 +34,13 @@ function connect() {
   client.addListener("error", msg => {
     console.log("irc error: ", msg);
   });
+  
+  client.addListener('message', function (from, to, message) {
+    var id = /\d{5,}/.exec(message);
+    if (id) {
+      say("Bug https://bugzil.la/"+id);
+    }
+  });
 }
 
 module.exports.say = say;
