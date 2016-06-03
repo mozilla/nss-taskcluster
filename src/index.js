@@ -42,7 +42,7 @@ tcc.onTaskDefined(async function (msg) {
   let changesets = await hg.fetchChangesets(th.revision);
 
   for (let changeset of changesets) {
-    irc.say(`[${level}] ${changeset.href} - ${changeset.author.name} - ${changeset.desc}`);
+    irc.say(`[${level}] ${changeset.href} — ${changeset.author.name} — ${changeset.desc}`);
   }
 });
 
@@ -74,11 +74,11 @@ tcc.onTaskFailed(async function (msg) {
   let level = colors.red("failure");
 
   let blame = unique(authors.map(author => author.name)).join(", ");
-  irc.say(`[${level}] ${url} - ${task.metadata.name} @ ${platform} ${collection} (blame: ${blame})`);
+  irc.say(`[${level}] ${url} — ${task.metadata.name} @ ${platform} ${collection} (blame: ${blame})`);
 
   // Build descriptions.
   let descriptions = changesets.map(changeset => {
-    return `${changeset.author.name} - ${changeset.desc}\n${changeset.href}`;
+    return `${changeset.author.name} — ${changeset.desc}\n${changeset.href}`;
   });
 
   // Send emails.
