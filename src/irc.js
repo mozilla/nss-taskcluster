@@ -60,10 +60,16 @@ function connect() {
 
     let id = match[1];
     let client = request.createClient(BZ_HOST);
-    let {bugs: [bug]} = await jsonRequest(`/rest/bug/${id}`);
-    let status = bug.resolution || bug.status;
+    let response = await jsonRequest(`/rest/bug/${id}`);
 
-    say(`https://bugzil.la/${id} — ${status}, ${bug.assigned_to} — ${bug.summary}`);
+    if (response.code == 102) {
+      say(`https://bugzil.la/${id} — (not authorized to access bug)`);
+    } else if (response.bugs) {
+      let [bug] = response.bugs;
+      let status = bug.resolution || bug.status;
+
+      say(`https://bugzil.la/${id} — ${status}, ${bug.assigned_to} — ${bug.summary}`);
+    }
   });
 }
 
