@@ -13,8 +13,22 @@ const MAX_FAILURES_PER_REVISION = 3;
 const TASK_INSPECTOR_URL = "https://tools.taskcluster.net/task-inspector/#";
 
 const PLATFORMS = {
-  linux32: "Linux",
-  linux64: "Linux x64"
+  "linux32": "Linux",
+  "linux64": "Linux x64",
+  "osx-10-6": "OS X 10.6",
+  "osx-10-7": "OS X 10.7",
+  "osx-10-8": "OS X 10.8",
+  "osx-10-9": "OS X 10.9",
+  "osx-10-10": "OS X 10.10",
+  "osx-10-11": "OS X 10.11",
+  "windowsxp": "Windows XP",
+  "windows7-32": "Windows 7",
+  "windows7-64": "Windows 7 x64",
+  "windows8-32": "Windows 8",
+  "windows8-64": "Windows 8 x64",
+  "windows10-32": "Windows 10",
+  "windows10-64": "Windows 10 x64",
+  "windows2012-64": "Windows 2012 x64"
 };
 
 let failuresPerRevision = new Map();
