@@ -56,7 +56,8 @@ tcc.onTaskDefined(async function (msg) {
   let changesets = await hg.fetchChangesets(th.revision);
 
   for (let changeset of changesets) {
-    irc.say(`[${level}] ${changeset.href} — ${changeset.author.name} — ${changeset.desc}`);
+    let branch = changeset.branch == "default" ? "" : colors.gray(` ${changeset.branch}`);
+    irc.say(`[${level}${branch}] ${changeset.href} — ${changeset.author.name} — ${changeset.desc}`);
   }
 });
 
