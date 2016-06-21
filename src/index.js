@@ -33,13 +33,23 @@ const PLATFORMS = {
 
 let failuresPerRevision = new Map();
 
-function containsNssRoute(routes) {
-  return routes.some(r => /^tc-treeherder(\.v2)?\.nss\./.test(r));
+function parseRevision(routes) {
+  let route = routes.find(r => /^tc-treeherder(\.v2)?\.nss\./.test(r));
+  if (!route) {
+    return null;
+  }
+
+  let matches = route.match(/^tc-treeherder(?:\.v2)?\.nss\.([a-f0-9]+)/);
+  if (!matches) {
+    return null;
+  }
+
+  return matches[1];
 }
 
 tcc.onTaskDefined(async function (msg) {
-  // Check for NSS tasks.
-  if (!containsNssRoute(msg.routes)) {
+  let revision = parseRevision(msg.routes);
+  if (!revision) {
     return;
   }
 
@@ -53,7 +63,6 @@ tcc.onTaskDefined(async function (msg) {
   }
 
   let level = colors.blue("push");
-  let revision = task.payload.env.NSS_HEAD_REVISION;
   let changesets = await hg.fetchChangesets(revision);
 
   for (let changeset of changesets) {
@@ -63,8 +72,8 @@ tcc.onTaskDefined(async function (msg) {
 });
 
 tcc.onTaskFailed(async function (msg) {
-  // Check for NSS tasks.
-  if (!containsNssRoute(msg.routes)) {
+  let revision = parseRevision(msg.routes);
+  if (!revision) {
     return;
   }
 
@@ -73,7 +82,6 @@ tcc.onTaskFailed(async function (msg) {
   let th = task.extra.treeherder;
 
   // Let's not annoy people.
-  let revision = task.payload.env.NSS_HEAD_REVISION;
   let numFailures = failuresPerRevision.get(revision) || 0;
   failuresPerRevision.set(revision, ++numFailures);
   if (numFailures > MAX_FAILURES_PER_REVISION) {
