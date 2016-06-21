@@ -34,7 +34,7 @@ const PLATFORMS = {
 let failuresPerRevision = new Map();
 
 function containsNssRoute(routes) {
-  return routes.some(r => /^tc-treeherder\.nss\./.test(r));
+  return routes.some(r => /^tc-treeherder(\.v2)?\.nss\./.test(r));
 }
 
 tcc.onTaskDefined(async function (msg) {
