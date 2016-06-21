@@ -53,7 +53,8 @@ tcc.onTaskDefined(async function (msg) {
   }
 
   let level = colors.blue("push");
-  let changesets = await hg.fetchChangesets(th.revision);
+  let revision = task.payload.env.NSS_HEAD_REVISION;
+  let changesets = await hg.fetchChangesets(revision);
 
   for (let changeset of changesets) {
     let branch = changeset.branch == "default" ? "" : colors.gray(` ${changeset.branch}`);
@@ -72,8 +73,9 @@ tcc.onTaskFailed(async function (msg) {
   let th = task.extra.treeherder;
 
   // Let's not annoy people.
-  let numFailures = failuresPerRevision.get(th.revision) || 0;
-  failuresPerRevision.set(th.revision, ++numFailures);
+  let revision = task.payload.env.NSS_HEAD_REVISION;
+  let numFailures = failuresPerRevision.get(revision) || 0;
+  failuresPerRevision.set(revision, ++numFailures);
   if (numFailures > MAX_FAILURES_PER_REVISION) {
     return;
   }
@@ -83,7 +85,7 @@ tcc.onTaskFailed(async function (msg) {
   let platform = PLATFORMS[th.build.platform] || th.build.platform;
 
   // Fetch changesets.
-  let changesets = await hg.fetchChangesets(th.revision);
+  let changesets = await hg.fetchChangesets(revision);
   let authors = changesets.map(changeset => changeset.author);
   let url = TASK_INSPECTOR_URL + taskId;
   let level = colors.red("failure");
@@ -98,7 +100,7 @@ tcc.onTaskFailed(async function (msg) {
 
   // Send emails.
   email.send(authors,
-    `[NSS Taskcluster] ${task.metadata.name} FAILING on ${platform} ${collection} @ ${th.revision}`,
+    `[NSS Taskcluster] ${task.metadata.name} FAILING on ${platform} ${collection} @ ${revision}`,
     `${task.metadata.name} @ ${platform} ${collection}\n` +
     `${url}\n\n${descriptions.join("\n\n")}`);
 });
