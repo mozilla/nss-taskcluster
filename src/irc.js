@@ -40,7 +40,7 @@ function findBugNumber(message) {
     return match[1];
   }
 
-  let match = /https:\/\/bugzilla\.mozilla\.org\/show_bug\.cgi\?id=(\d{5,})/.exec(message);
+  match = /https:\/\/bugzilla\.mozilla\.org\/show_bug\.cgi\?id=(\d{5,})/.exec(message);
   if (match) {
     return match[1];
   }
