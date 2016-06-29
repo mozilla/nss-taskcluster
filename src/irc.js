@@ -34,6 +34,20 @@ function say(msg) {
   client.say(CHANNEL, msg);
 };
 
+function findBugNumber(message) {
+  let match = /[Bb]ug (\d{5,})/.exec(message);
+  if (match) {
+    return match[1];
+  }
+
+  let match = /https:\/\/bugzilla\.mozilla\.org\/show_bug\.cgi\?id=(\d{5,})/.exec(message);
+  if (match) {
+    return match[1];
+  }
+
+  return null;
+}
+
 function connect() {
   if (client) {
     return;
@@ -53,12 +67,11 @@ function connect() {
 
   // Listen for bug numbers.
   client.addListener(`message${CHANNEL}`, async function (from, message) {
-    let match = /[Bb]ug (\d{5,})/.exec(message);
-    if (!match) {
+    let id = findBugNumber(message);
+    if (!id) {
       return;
     }
 
-    let id = match[1];
     let client = request.createClient(BZ_HOST);
     let response = await jsonRequest(`/rest/bug/${id}`);
 
