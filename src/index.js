@@ -88,6 +88,11 @@ tcc.onTaskFailed(async function (msg) {
     return;
   }
 
+  // Ignore tier-3 task failures.
+  if (parseInt(th.tier || 1, 10) == 3) {
+    return;
+  }
+
   // Determine platform.
   let collection = Object.keys(th.collection || {})[0] || "opt";
   let platform = PLATFORMS[th.build.platform] || th.build.platform;
