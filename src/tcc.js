@@ -5,7 +5,6 @@
 import taskcluster from "taskcluster-client";
 
 let queueEvents = new taskcluster.QueueEvents();
-let scheduler = new taskcluster.Scheduler();
 let queue = new taskcluster.Queue();
 
 function onTaskDefined(callback) {
@@ -13,15 +12,7 @@ function onTaskDefined(callback) {
 }
 
 function onTaskFailed(callback) {
-  onTaskEvent("taskFailed", async function (msg) {
-    let {taskId, taskGroupId} = msg.payload.status;
-    let info = await scheduler.inspectTask(taskGroupId, taskId);
-
-    // Report failures when the last rerun fails.
-    if (info.reruns == msg.payload.runId) {
-      callback(msg);
-    }
-  });
+  onTaskEvent("taskFailed", callback);
 }
 
 function onTaskEvent(type, callback) {
