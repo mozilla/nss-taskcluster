@@ -6,7 +6,6 @@ import request from "request-json";
 import parse from "peoplestring-parse";
 
 const HG_HOST = "https://hg.mozilla.org/";
-const HG_REPO = "projects/nss";
 
 async function jsonRequest(url) {
   let client = request.createClient(HG_HOST);
@@ -22,10 +21,10 @@ async function jsonRequest(url) {
   });
 }
 
-async function shortenRevision(revision) {
+async function shortenRevision(revision, repo) {
   async function tryShortenedRevisionHash(length) {
     let shortened = revision.slice(0, length);
-    let json = jsonRequest(HG_REPO + "/json-pushes?changeset=" + shortened);
+    let json = jsonRequest(repo + "/json-pushes?changeset=" + shortened);
 
     if (typeof(json) == "object") {
       return shortened;
@@ -37,8 +36,8 @@ async function shortenRevision(revision) {
   return tryShortenedRevisionHash(12);
 };
 
-async function fetchChangesets(revision) {
-  let json = await jsonRequest(HG_REPO + "/json-pushes?full&changeset=" + revision);
+async function fetchChangesets(revision, repo) {
+  let json = await jsonRequest(repo + "/json-pushes?full&changeset=" + revision);
 
   let id = Object.keys(json)[0];
   let changesets = json[id].changesets;
@@ -47,8 +46,8 @@ async function fetchChangesets(revision) {
     changeset.author = parse(changeset.author);
     changeset.desc = changeset.desc.split("\n")[0];
 
-    let short_rev = await shortenRevision(changeset.node);
-    changeset.href = HG_HOST + HG_REPO + "/rev/" + short_rev;
+    let short_rev = await shortenRevision(changeset.node, repo);
+    changeset.href = HG_HOST + repo + "/rev/" + short_rev;
   }
 
   return changesets;

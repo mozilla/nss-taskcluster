@@ -47,27 +47,17 @@ function parseRevision(routes) {
   return matches[1];
 }
 
-tcc.onTaskDefined(async function (msg) {
-  let revision = parseRevision(msg.routes);
-  if (!revision) {
-    return;
-  }
+tcc.onRevisionPushed(async function (msg) {
+  let {heads} = msg.payload.payload;
 
-  let taskId = msg.payload.status.taskId;
-  let task = await tcc.fetchTask(taskId);
-  let th = task.extra.treeherder;
+  for (let head of heads) {
+    let changesets = await hg.fetchChangesets(head, msg.routingKey);
 
-  // Check for decision tasks.
-  if (th.symbol != "D") {
-    return;
-  }
-
-  let level = colors.blue("push");
-  let changesets = await hg.fetchChangesets(revision);
-
-  for (let changeset of changesets) {
-    let branch = changeset.branch == "default" ? "" : colors.gray(` ${changeset.branch}`);
-    irc.say(`[${level}${branch}] ${changeset.href} — ${changeset.author.name} — ${changeset.desc}`);
+    for (let changeset of changesets) {
+      let level = colors.blue("push");
+      let branch = changeset.branch == "default" ? "" : colors.gray(` ${changeset.branch}`);
+      irc.say(`[${level}${branch}] ${changeset.href} — ${changeset.author.name} — ${changeset.desc}`);
+    }
   }
 });
 
@@ -98,7 +88,7 @@ tcc.onTaskFailed(async function (msg) {
   let platform = PLATFORMS[th.build.platform] || th.build.platform;
 
   // Fetch changesets.
-  let changesets = await hg.fetchChangesets(revision);
+  let changesets = await hg.fetchChangesets(revision, "projects/nss");
   let authors = changesets.map(changeset => changeset.author);
   let url = TASK_INSPECTOR_URL + taskId;
   let level = colors.red("failure");

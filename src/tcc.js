@@ -4,26 +4,37 @@
 
 import taskcluster from "taskcluster-client";
 
+const HG_EXCHANGE = "exchange/hgpushes/v1";
+
 let queueEvents = new taskcluster.QueueEvents();
 let queue = new taskcluster.Queue();
 
-function onTaskDefined(callback) {
-  onTaskEvent("taskDefined", callback);
-}
-
-function onTaskFailed(callback) {
-  onTaskEvent("taskFailed", callback);
-}
-
-function onTaskEvent(type, callback) {
-  let listener = new taskcluster.PulseListener({
+function createListener() {
+  return new taskcluster.PulseListener({
     credentials: {
       username: process.env.PG_USERNAME,
       password: process.env.PG_PASSWORD
     }
   });
+}
 
-  listener.bind(queueEvents[type]({
+function onRevisionPushed(callback) {
+  let listener = createListener();
+
+  listener.bind({exchange: HG_EXCHANGE, routingKeyPattern: "projects/nspr"});
+  listener.bind({exchange: HG_EXCHANGE, routingKeyPattern: "projects/nss"});
+
+  listener.on("message", callback);
+
+  listener.connect().then(() => {
+    return listener.resume();
+  });
+}
+
+function onTaskFailed(callback) {
+  let listener = createListener();
+
+  listener.bind(queueEvents.taskFailed({
     provisionerId: "aws-provisioner-v1",
     workerType: "hg-worker"
   }));
@@ -39,6 +50,6 @@ async function fetchTask(taskId) {
   return queue.task(taskId);
 }
 
-module.exports.onTaskDefined = onTaskDefined;
+module.exports.onRevisionPushed = onRevisionPushed;
 module.exports.onTaskFailed = onTaskFailed;
 module.exports.fetchTask = fetchTask;
