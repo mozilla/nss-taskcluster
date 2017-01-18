@@ -39,6 +39,11 @@ function onTaskFailed(callback) {
     workerType: "hg-worker"
   }));
 
+  listener.bind(queueEvents.taskFailed({
+    provisionerId: "aws-provisioner-v1",
+    workerType: "nss-win2012r2"
+  }));
+
   listener.on("message", callback);
 
   listener.connect().then(() => {
