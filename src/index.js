@@ -5,7 +5,6 @@
 import hg from "./hg";
 import irc from "./irc";
 import tcc from "./tcc";
-import email from "./email";
 import colors from "irc-colors";
 import unique from "array-unique";
 
@@ -95,17 +94,6 @@ tcc.onTaskFailed(async function (msg) {
 
   let blame = unique(authors.map(author => author.name)).join(", ");
   irc.say(`[${level}] ${url} — ${task.metadata.name} @ ${platform} ${collection} (blame: ${blame})`);
-
-  // Build descriptions.
-  let descriptions = changesets.map(changeset => {
-    return `${changeset.author.name} — ${changeset.desc}\n${changeset.href}`;
-  });
-
-  // Send emails.
-  email.send(authors,
-    `[NSS Taskcluster] ${task.metadata.name} FAILING on ${platform} ${collection} @ ${revision}`,
-    `${task.metadata.name} @ ${platform} ${collection}\n` +
-    `${url}\n\n${descriptions.join("\n\n")}`);
 });
 
 // Join ASAP.
